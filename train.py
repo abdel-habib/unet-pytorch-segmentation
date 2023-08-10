@@ -9,6 +9,7 @@ import torch.nn as nn
 from model.unet import UNet
 from model.hyperparameters import get_hparams
 from dataset import DriveDataset
+from callbacks.early_stopping import EarlyStopping
 
 from loss import DiceLoss, DiceBCELoss
 from utils import seeding, create_dir, epoch_time
@@ -116,21 +117,27 @@ if __name__ == "__main__":
 
     # training the model
     best_valid_loss = float('inf')
+    early_stopping = EarlyStopping(patience=5, verbose=True, path=hyperparameters['checkpoint_path'])
 
     for epoch in range(hyperparameters['n_epochs']):
         start_time = time.time()
 
+        # train and validate
         train_loss = train(model, train_loader, optimizer, loss_fn, device)
         valid_loss = evaluate(model, valid_loader, loss_fn, device)
 
-        # saving the model with the best_valid_loss
-        if valid_loss < best_valid_loss:
-            print(f"Valid loss improved from {best_valid_loss} to {valid_loss}")
+        # scheduler step based on the validation loss
+        scheduler.step(valid_loss)
+        after_lr = optimizer.param_groups[0]["lr"]
 
-            best_valid_loss = valid_loss
-            torch.save(model.state_dict(), hyperparameters['checkpoint_path'])
+        # handle early stopping and saving model
+        early_stopping(valid_loss, model)
 
+        if early_stopping.early_stop:
+            print(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
+            break
+        
         end_time = time.time()
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 
-        print(f'Epoch: {epoch+1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s  | Train Loss: {train_loss:.3f} | Val. Loss: {valid_loss:.3f}')
+        print(f'Epoch: {epoch+1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}')
