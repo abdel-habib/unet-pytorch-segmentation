@@ -15,6 +15,7 @@ from loss import DiceLoss, DiceBCELoss
 from utils import seeding, create_dir, epoch_time
 
 from loguru import logger
+from torchsummary import summary
 
 
 def train(model, train_loader, optimizer, loss_fn, device):
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     # create model checkpoints folder if it doesn't exist
     create_dir("checkpoints")
 
-    # load the dataset
+    # load the augmented dataset
     train_x = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/train/image/*')))
     train_y = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/train/mask/*')))
     valid_x = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/test/image/*')))
@@ -101,13 +102,11 @@ if __name__ == "__main__":
         print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
         print('Cached:   ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB\n')
 
-        device = torch.device('cuda')
-
-    else:
-        device = torch.device('cpu')
+    logger.info(f"Using device: {device}")
 
     model = UNet()
     model = model.to(device)
+    summary(model.cuda(), (3, hyperparameters['size'][0], hyperparameters['size'][1]))
 
     # setting up the optimizer and the lr scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=hyperparameters['learning_rate'])
