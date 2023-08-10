@@ -7,7 +7,8 @@ def get_hparams():
         "n_epochs": 50,
         "batch_size": 2,
         "size": (512, 512),
-        "checkpoint_path": os.path.join(os.getcwd(), "checkpoints/checkpoint.pth")
+        "checkpoint_path": os.path.join(os.getcwd(), "checkpoints/checkpoint.pth"),
+        "results_path": os.path.join(os.getcwd(), "results/")
         }
 
     logger.info(f"Hyperparameters: {params}")
