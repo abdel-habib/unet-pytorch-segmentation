@@ -54,13 +54,14 @@ def evaluate(model, valid_loader, loss_fn, device):
             loss = loss_fn(y_pred, y)
             epoch_loss += loss.item()
     
-        epoch_loss = epoch_loss / len(train_loader)
+        epoch_loss = epoch_loss / len(valid_loader)
     return epoch_loss
 
 
 if __name__ == "__main__":
     seeding(42)
 
+    # create model checkpoints folder if it doesn't exist
     create_dir("checkpoints")
 
     # load the dataset
