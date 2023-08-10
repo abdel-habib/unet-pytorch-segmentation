@@ -14,7 +14,6 @@ from loss import DiceLoss, DiceBCELoss
 from utils import seeding, create_dir, epoch_time
 
 from loguru import logger
-from tqdm import tqdm
 
 
 def train(model, train_loader, optimizer, loss_fn, device):
@@ -40,6 +39,22 @@ def train(model, train_loader, optimizer, loss_fn, device):
 
     return epoch_loss
 
+def evaluate(model, valid_loader, loss_fn, device):
+    epoch_loss = 0.0
+
+    model.eval()
+
+    with torch.no_grad():
+        for x, y in valid_loader:
+            x = x.to(device, dtype=torch.float32)  # Move to device
+            y = y.to(device, dtype=torch.float32)  # Move to device
+
+            y_pred = model(x)
+            loss = loss_fn(y_pred, y)
+            epoch_loss += loss.item()
+    
+        epoch_loss = epoch_loss / len(train_loader)
+    return epoch_loss
 
 
 if __name__ == "__main__":
@@ -48,8 +63,8 @@ if __name__ == "__main__":
     create_dir("checkpoints")
 
     # load the dataset
-    train_x = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/train/image/*')))[:20]
-    train_y = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/train/mask/*')))[:20]
+    train_x = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/train/image/*')))
+    train_y = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/train/mask/*')))
     valid_x = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/test/image/*')))
     valid_y = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/test/mask/*')))
     logger.info(f"train size: {len(train_x)}, valid size: {len(valid_x)}")
@@ -82,7 +97,7 @@ if __name__ == "__main__":
         print(torch.cuda.get_device_name(0))
         print('Memory Usage:')
         print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
-        print('Cached:   ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB')
+        print('Cached:   ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB\n')
 
         device = torch.device('cuda')
 
@@ -100,7 +115,22 @@ if __name__ == "__main__":
     loss_fn = DiceBCELoss()
 
     # training the model
-    for epoch in tqdm(range(hyperparameters['n_epochs'])):
+    best_valid_loss = float('inf')
+
+    for epoch in range(hyperparameters['n_epochs']):
         start_time = time.time()
 
         train_loss = train(model, train_loader, optimizer, loss_fn, device)
+        valid_loss = evaluate(model, valid_loader, loss_fn, device)
+
+        # saving the model with the best_valid_loss
+        if valid_loss < best_valid_loss:
+            print(f"Valid loss improved from {best_valid_loss} to {valid_loss}")
+
+            best_valid_loss = valid_loss
+            torch.save(model.state_dict(), hyperparameters['checkpoint_path'])
+
+        end_time = time.time()
+        epoch_mins, epoch_secs = epoch_time(start_time, end_time)
+
+        print(f'Epoch: {epoch+1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s  | Train Loss: {train_loss:.3f} | Val. Loss: {valid_loss:.3f}')

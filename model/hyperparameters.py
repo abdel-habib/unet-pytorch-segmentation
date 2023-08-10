@@ -1,4 +1,5 @@
 from loguru import logger
+import os
 
 def get_hparams():
     params = {
@@ -6,7 +7,7 @@ def get_hparams():
         "n_epochs": 50,
         "batch_size": 2,
         "size": (512, 512),
-        "checkpoint_path": "checkpoints/checkpoint.pth"
+        "checkpoint_path": os.path.join(os.getcwd(), "checkpoints/checkpoint.pth")
         }
 
     logger.info(f"Hyperparameters: {params}")
