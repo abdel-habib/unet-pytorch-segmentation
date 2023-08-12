@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 import torchvision.transforms.functional as TF
+from torchsummary import summary
 
 
 class DoubleConv(nn.Module):
@@ -22,7 +23,7 @@ class DoubleConv(nn.Module):
         return self.conv(x)
     
 class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=1, features=[64, 128, 256, 512], ):
+    def __init__(self, in_channels=3, out_channels=1, features=[64, 128, 256, 512]):
         super(UNet, self).__init__()
         '''
         in_channels is the number of input channels of the segmentation, color RGB image = 3 channels
@@ -87,3 +88,9 @@ class UNet(nn.Module):
             x = self.ups[idx+1](concat_skip)
 
         return self.final_conv(x)
+
+
+if __name__ == "__main__":
+    model = UNet(1, 1)
+    summary(model.cuda(), (1, 572, 572))
+
