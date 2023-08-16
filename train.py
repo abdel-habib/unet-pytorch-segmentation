@@ -156,9 +156,9 @@ if __name__ == "__main__":
     runs_file = os.path.join(log_path, snapshot_path.split('/')[-1]+'.txt')
 
     with open(runs_file, "a") as f:
-        f.write(f'--train_path "{args.train_path}" --val_path "{args.val_path}" --output "{args.output}" --dataset "{args.dataset}" --dataset "{args.dataset}" --max_epochs {args.max_epochs} --batch_size {args.batch_size} --base_lr {args.base_lr} --patience {args.patience} --img_size {args.img_size} --seed {args.seed} --ckpt "{args.ckpt}" \n')
-        f.write(f'checkpoint_file path: {checkpoint_file}\n' )
-        f.write(f'runs_file path: {runs_file}\n')
+        f.write(f'--train_path "{args.train_path}" --val_path "{args.val_path}" --output "{args.output}" --dataset "{args.dataset}" --max_epochs {args.max_epochs} --batch_size {args.batch_size} --base_lr {args.base_lr} --patience {args.patience} --img_size {args.img_size} --seed {args.seed} --ckpt "{args.ckpt}" \n')
+        f.write(f'\ncheckpoint_file path: {checkpoint_file}\n' )
+        f.write(f'runs_file path: {runs_file}\n\n')
 
         for epoch in range(args.max_epochs):
             start_time = time.time()
