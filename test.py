@@ -4,9 +4,9 @@ import numpy as np
 from glob import glob
 import cv2
 from tqdm import tqdm
-import imageio
 import torch
 from sklearn.metrics import accuracy_score, f1_score, jaccard_score, precision_score, recall_score
+import argparse
 
 from model.unet import UNet
 from utils import create_dir, seeding
@@ -40,16 +40,26 @@ def mask_parse(mask):
 
 
 if __name__ == "__main__":
-    seeding(42)
+    # command args
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--test_path', type=str, default='/data/test/', help='root dir for the test data directory')
+    parser.add_argument('--output_dir', type=str, default='/output/', help="output dir for saving the segmentation results")
+    parser.add_argument('--seed', type=int, default=42, help='random seed')
+    parser.add_argument('--ckpt', type=str, default='checkpoints/checkpoint_01ec64.pth', help='pretrained checkpoint')
+
+    args = parser.parse_args()
+
+    seeding(args.seed)
 
     # create results folder if it doesn't exist
-    create_dir("results")
+    create_dir(args.output_dir)
 
     # load the test dataset, note that we have the test as the valid (not sufficient data)
     # the test has to be resized too in the augmentation process if it is different
     # thus we will use the same valid data for testing on this dataset
-    test_x = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/test/image/*')))
-    test_y = sorted(glob(os.path.join(os.getcwd(), 'data/augmented/test/mask/*')))
+    test_x = sorted(glob(os.path.join(os.getcwd(), args.test_path ,'images/*')))
+    test_y = sorted(glob(os.path.join(os.getcwd(), args.test_path, 'masks/*')))
 
     # get model hyperparameters
     hyperparameters = get_hparams()
@@ -59,7 +69,7 @@ if __name__ == "__main__":
 
     model = UNet()
     model = model.to(device)
-    model.load_state_dict(torch.load(hyperparameters['checkpoint_path'], map_location=device))
+    model.load_state_dict(torch.load(os.path.join(os.getcwd(), args.ckpt), map_location=device))
     model.eval()
 
     # calculate the metrics
@@ -114,14 +124,14 @@ if __name__ == "__main__":
 
         # saving masks
         original_mask = mask_parse(mask)
-        pred_y = mask_parse(mask)
+        pred_y = mask_parse(pred_y)
         line = np.ones([hyperparameters['size'][1], 10, 3]) * 128
 
         cat_img = np.concatenate(
             [img, line, original_mask, line, pred_y * 255], axis=1
         )
 
-        cv2.imwrite(os.path.join(hyperparameters['results_path'], f'{name}.png'), cat_img)
+        cv2.imwrite(os.path.join(os.getcwd(), args.output_dir, f'{name}.png'), cat_img)
 
     # calculate the mean score
     jaccard = metrics_score[0]/len(test_x)
@@ -133,6 +143,19 @@ if __name__ == "__main__":
     
     fps = 1/np.mean(time_taken)
     print("FPS: ", fps)
+
+    with open(os.path.join(os.getcwd(), args.output_dir, "readme.txt"), 'w') as f:
+        f.write(f'--test_path "{args.test_path}" --output "{args.output_dir}" --seed {args.seed} --ckpt "{args.ckpt}"\n\n')
+        f.write("Metrics obtained:\n")
+        f.write(f"Jaccard: {jaccard:1.4f}\n")
+        f.write(f"F1: {f1:1.4f}\n")
+        f.write(f"Recall: {recall:1.4f}\n")
+        f.write(f"Precision: {precision:1.4f}\n")
+        f.write(f"Accuracy: {acc:1.4f}\n\n")
+        f.write(f"FPS: {fps}")
+
+
+
         
 
 
