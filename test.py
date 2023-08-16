@@ -10,7 +10,6 @@ import argparse
 
 from model.unet import UNet
 from utils import create_dir, seeding
-from model.hyperparameters import get_hparams
 
 def calculate_metrics(y_true, y_pred):
     # gt
@@ -43,26 +42,29 @@ if __name__ == "__main__":
     # command args
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--test_path', type=str, default='/data/test/', help='root dir for the test data directory')
-    parser.add_argument('--output_dir', type=str, default='/output/', help="output dir for saving the segmentation results")
+    parser.add_argument('--test_path', type=str, default='data/test/', help='root dir for the test data directory')
+    parser.add_argument('--output', type=str, default='results/', help="output dir for saving the segmentation results")
     parser.add_argument('--seed', type=int, default=42, help='random seed')
-    parser.add_argument('--ckpt', type=str, default='checkpoints/checkpoint_01ec64.pth', help='pretrained checkpoint')
+    parser.add_argument('--ckpt', type=str, default='checkpoints/', help='pretrained checkpoint')
+    parser.add_argument('--img_size', type=int, default=512, help='input patch size of network input')
 
     args = parser.parse_args()
+
+    args.exp = args.ckpt.split('/')[1]
+    output_path = os.path.join(args.output, "{}".format(args.exp))
+    segmentation_results_path = os.path.join(output_path, 'segmentation_results')
+    log_path = os.path.join(output_path, "runs")
 
     seeding(args.seed)
 
     # create results folder if it doesn't exist
-    create_dir(args.output_dir)
+    create_dir(segmentation_results_path)
 
     # load the test dataset, note that we have the test as the valid (not sufficient data)
     # the test has to be resized too in the augmentation process if it is different
     # thus we will use the same valid data for testing on this dataset
     test_x = sorted(glob(os.path.join(os.getcwd(), args.test_path ,'images/*')))
     test_y = sorted(glob(os.path.join(os.getcwd(), args.test_path, 'masks/*')))
-
-    # get model hyperparameters
-    hyperparameters = get_hparams()
 
     # load the checkpoint
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -81,7 +83,7 @@ if __name__ == "__main__":
 
         # reading the image
         img = cv2.imread(x, cv2.IMREAD_COLOR) # (512, 512, 3)
-        img = cv2.resize(img, hyperparameters['size'])
+        img = cv2.resize(img, (args.img_size, args.img_size))
 
         x = np.transpose(img, (2, 0, 1)) # (3, 512, 512)
         x = x/255.0
@@ -92,7 +94,7 @@ if __name__ == "__main__":
 
         # reading the mask
         mask = cv2.imread(y, cv2.IMREAD_GRAYSCALE) # (512, 512)
-        mask = cv2.resize(mask, hyperparameters['size'])
+        mask = cv2.resize(mask, (args.img_size, args.img_size))
 
         y = np.expand_dims(mask, axis=0) # (1, 512, 512)
         y = y/255.0
@@ -125,13 +127,13 @@ if __name__ == "__main__":
         # saving masks
         original_mask = mask_parse(mask)
         pred_y = mask_parse(pred_y)
-        line = np.ones([hyperparameters['size'][1], 10, 3]) * 128
+        line = np.ones([args.img_size, 10, 3]) * 128
 
         cat_img = np.concatenate(
             [img, line, original_mask, line, pred_y * 255], axis=1
         )
 
-        cv2.imwrite(os.path.join(os.getcwd(), args.output_dir, f'{name}.png'), cat_img)
+        cv2.imwrite(os.path.join(os.getcwd(), segmentation_results_path, f'{name}.png'), cat_img)
 
     # calculate the mean score
     jaccard = metrics_score[0]/len(test_x)
@@ -144,8 +146,8 @@ if __name__ == "__main__":
     fps = 1/np.mean(time_taken)
     print("FPS: ", fps)
 
-    with open(os.path.join(os.getcwd(), args.output_dir, "readme.txt"), 'w') as f:
-        f.write(f'--test_path "{args.test_path}" --output "{args.output_dir}" --seed {args.seed} --ckpt "{args.ckpt}"\n\n')
+    with open(os.path.join(os.getcwd(), log_path, args.ckpt.split('/')[-1].split('.')[0]+"_test.txt"), 'w') as f:
+        f.write(f'--test_path "{args.test_path}" --output "{args.output}" --seed {args.seed} --ckpt "{args.ckpt}" --img_size {args.img_size}\n\n')
         f.write("Metrics obtained:\n")
         f.write(f"Jaccard: {jaccard:1.4f}\n")
         f.write(f"F1: {f1:1.4f}\n")
