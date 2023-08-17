@@ -46,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument('--output', type=str, default='results/', help="output dir for saving the segmentation results")
     parser.add_argument('--seed', type=int, default=42, help='random seed')
     parser.add_argument('--ckpt', type=str, default='checkpoints/', help='pretrained checkpoint')
-    parser.add_argument('--img_size', type=int, default=512, help='input patch size of network input')
+    parser.add_argument('--img_size', type=int, default=512, help='input image size of network input')
 
     args = parser.parse_args()
 

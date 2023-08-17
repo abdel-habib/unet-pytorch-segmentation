@@ -71,7 +71,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=12, help='batch_size per gpu')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='segmentation network learning rate')
     parser.add_argument('--patience', type=int, default=12, help='patience for lr scheduler')
-    parser.add_argument('--img_size', type=int, default=512, help='input patch size of network input')
+    parser.add_argument('--img_size', type=int, default=512, help='input image size of network input')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
     parser.add_argument('--ckpt', type=str, default='checkpoints/', help='pretrained checkpoint')
 
