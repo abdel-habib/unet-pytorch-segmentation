@@ -43,9 +43,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--test_path', type=str, default='data/test/', help='root dir for the test data directory')
-    parser.add_argument('--output', type=str, default='results/', help="output dir for saving the segmentation results")
+    parser.add_argument('--output', type=str, default='results', help="output dir for saving the segmentation results")
     parser.add_argument('--seed', type=int, default=42, help='random seed')
-    parser.add_argument('--ckpt', type=str, default='checkpoints/', help='pretrained checkpoint')
+    parser.add_argument('--ckpt', type=str, default='checkpoints/checkpoint.pth', help='pretrained checkpoint')
     parser.add_argument('--img_size', type=int, default=512, help='input image size of network input')
 
     args = parser.parse_args()

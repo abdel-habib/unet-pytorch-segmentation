@@ -65,15 +65,15 @@ if __name__ == "__main__":
 
     parser.add_argument('--train_path', type=str, default='data/train', help='root dir for train data')
     parser.add_argument('--val_path', type=str, default='data/val', help='root dir for validation data')
-    parser.add_argument('--output', type=str, default='results/', help="output dir for saving the segmentation results")
+    parser.add_argument('--output', type=str, default='results', help="output dir for saving the segmentation results")
     parser.add_argument('--dataset', type=str, default='kvasir', help='experiment_name')
     parser.add_argument('--max_epochs', type=int, default=50, help='maximum epoch number to train')
-    parser.add_argument('--batch_size', type=int, default=12, help='batch_size per gpu')
+    parser.add_argument('--batch_size', type=int, default=32, help='batch_size per gpu')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='segmentation network learning rate')
-    parser.add_argument('--patience', type=int, default=12, help='patience for lr scheduler')
+    parser.add_argument('--patience', type=int, default=7, help='patience for lr scheduler')
     parser.add_argument('--img_size', type=int, default=512, help='input image size of network input')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
-    parser.add_argument('--ckpt', type=str, default='checkpoints/', help='pretrained checkpoint')
+    parser.add_argument('--ckpt', type=str, default='checkpoints/checkpoint.pth', help='pretrained checkpoint')
 
     args = parser.parse_args()
 
