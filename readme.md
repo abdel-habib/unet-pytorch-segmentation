@@ -50,7 +50,7 @@ options:
                         batch_size per gpu
   --base_lr BASE_LR     segmentation network learning rate
   --patience PATIENCE   patience for lr scheduler
-  --img_size IMG_SIZE   input patch size of network input
+  --img_size IMG_SIZE   input image size of network input
   --seed SEED           random seed
   --ckpt CKPT           pretrained checkpoint
 ```
