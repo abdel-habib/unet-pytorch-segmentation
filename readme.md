@@ -1,7 +1,9 @@
 ## Prerequisites
 - Linux (was tested on Ubuntu 22.04.3 LTS)
-- Python 3.7.11
-- Pytorch 1.9.1
+- Python 3.10.4 (was tested on this version, any other should be fine)
+- Pytorch 2.0.1+cu117
+
+This code is runnable on any other versions of the above.
 
 To get started, first please clone the repo
 ```
