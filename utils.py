@@ -18,3 +18,8 @@ def epoch_time(start_time, end_time):
     elapsed_time = end_time - start_time
     elapsed_mins, elapsed_secs = divmod(elapsed_time, 60)
     return elapsed_mins, elapsed_secs
+
+def check_data_empty(data_x, data_y, data_name):
+    if len(data_x) == 0 or len(data_y) == 0:
+        raise ValueError(f'Missing {data_name} data. Please check if the given paths are correct.')
+

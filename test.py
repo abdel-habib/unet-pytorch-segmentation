@@ -7,9 +7,10 @@ from tqdm import tqdm
 import torch
 from sklearn.metrics import accuracy_score, f1_score, jaccard_score, precision_score, recall_score
 import argparse
+from loguru import logger
 
 from model.unet import UNet
-from utils import create_dir, seeding
+from utils import create_dir, seeding, check_data_empty
 
 def calculate_metrics(y_true, y_pred):
     # gt
@@ -66,12 +67,17 @@ if __name__ == "__main__":
     test_x = sorted(glob(os.path.join(os.getcwd(), args.test_path ,'images/*')))
     test_y = sorted(glob(os.path.join(os.getcwd(), args.test_path, 'masks/*')))
 
+    logger.info(f"test image size: {len(test_x)}, test mask size: {len(test_y)}")    
+
+    check_data_empty(test_x, test_y, 'testing')
+
     # load the checkpoint
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = UNet()
     model = model.to(device)
-    model.load_state_dict(torch.load(os.path.join(os.getcwd(), args.ckpt), map_location=device))
+    checkpoint = torch.load(os.path.join(os.getcwd(), args.ckpt), map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
     # calculate the metrics
@@ -146,7 +152,7 @@ if __name__ == "__main__":
     fps = 1/np.mean(time_taken)
     print("FPS: ", fps)
 
-    with open(os.path.join(os.getcwd(), log_path, args.ckpt.split('/')[-1].split('.')[0]+"_test.txt"), 'w') as f:
+    with open(os.path.join(os.getcwd(), log_path, args.ckpt.split('/')[-1].split('.pth')[0]+"_test.txt"), 'w') as f:
         f.write(f'--test_path "{args.test_path}" --output "{args.output}" --seed {args.seed} --ckpt "{args.ckpt}" --img_size {args.img_size}\n\n')
         f.write("Metrics obtained:\n")
         f.write(f"Jaccard: {jaccard:1.4f}\n")

@@ -12,7 +12,7 @@ from dataset import DriveDataset
 from callbacks.early_stopping import EarlyStopping
 
 from loss import DiceLoss, DiceBCELoss
-from utils import seeding, create_dir, epoch_time
+from utils import seeding, create_dir, epoch_time, check_data_empty
 
 from loguru import logger
 from torchsummary import summary
@@ -108,7 +108,11 @@ if __name__ == "__main__":
     valid_x = sorted(glob(os.path.join(os.getcwd(), args.val_path, 'images/*')))
     valid_y = sorted(glob(os.path.join(os.getcwd(), args.val_path, 'masks/*')))
 
-    logger.info(f"train size: {len(train_x)}, valid size: {len(valid_x)}")    
+    logger.info(f"train image size: {len(train_x)}, train mask size: {len(train_y)}")    
+    logger.info(f"valid image size: {len(valid_x)}, valid mask size: {len(valid_y)}")    
+
+    check_data_empty(train_x, train_y, 'training')
+    check_data_empty(valid_x, valid_y, 'validation')
 
     # dataset and loader
     train_dataset = DriveDataset(train_x, train_y)
@@ -152,8 +156,8 @@ if __name__ == "__main__":
 
     # training the model
     best_valid_loss = float('inf')
-    early_stopping = EarlyStopping(patience=args.patience, verbose=True, path=checkpoint_file)
     runs_file = os.path.join(log_path, snapshot_path.split('/')[-1]+'.txt')
+    early_stopping = EarlyStopping(patience=args.patience, verbose=True, path=checkpoint_file)
 
     with open(runs_file, "a") as f:
         f.write(f'--train_path "{args.train_path}" --val_path "{args.val_path}" --output "{args.output}" --dataset "{args.dataset}" --max_epochs {args.max_epochs} --batch_size {args.batch_size} --base_lr {args.base_lr} --patience {args.patience} --img_size {args.img_size} --seed {args.seed} --ckpt "{args.ckpt}" \n')
@@ -172,14 +176,14 @@ if __name__ == "__main__":
             after_lr = optimizer.param_groups[0]["lr"]
 
             # handle early stopping and saving model
-            early_stopping(valid_loss, model)
-
-            if early_stopping.early_stop:
-                print(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
-                break
+            early_stopping(valid_loss, model, optimizer=optimizer, epoch=epoch)
             
             end_time = time.time()
             epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 
             print(f'Epoch: {epoch+1:02}/{args.max_epochs} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}')
             f.write(f'Epoch: {epoch+1:02}/{args.max_epochs} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}\n')
+
+            if early_stopping.early_stop:
+                print(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
+                break
