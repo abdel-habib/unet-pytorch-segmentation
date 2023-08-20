@@ -1,5 +1,7 @@
 datasets/*
 
+!datasets/.gitkeep
+
 checkpoints/*
 results/*
 
