@@ -1,5 +1,8 @@
 # <h1 align="center">UNet PyTorch Implementation for Medical Image Segmentation</h1>
 
+![alt text](https://github.com/abdalrhmanu/unet-pytorch-segmentation/blob/main/static/resuslt_kvasir.jpg?raw=true)
+![alt text](https://github.com/abdalrhmanu/unet-pytorch-segmentation/blob/main/static/result_retina.jpg?raw=true)
+
 
 ## Prerequisites
 - Linux (was tested on Ubuntu 22.04.3 LTS)
