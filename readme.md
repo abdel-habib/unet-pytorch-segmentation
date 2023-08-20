@@ -21,13 +21,20 @@ If you wish to train/test using the same datasets, the code has been experimente
 2. <a href="https://www.kaggle.com/datasets/zionfuo/drive2004">DRIVE 2004 - Digital Retinal Images for Vessel Extraction</a>
 
 
+## Data Preprocessing
+The augmentation processes can be made using the following command
+```bash
+python data_aug.py --dataset <dataset folder name>
+```
+It is recommended to view the augmentations applied inside the file and modify them if necessary depending on your dataset. Also make sure to have the dataset folder inside the `datasets` folder.
+
 ## Training
 NVIDIA GeForce RTX 3060 Laptop GPU was used for training.
 1. Please download any dataset that contains both images and masks, and put it in `datasets/<Your folder>`.
 2. Augment and prepare the dataset (it is necessary to resize your dataset at least if you won't perform any other augmentation) using `data_aug.py` file.
 3. Run this command to train.
 ```bash
-python train.py --train_path "datasets/<dataset folder name>/augmented/train" --val_path "datasets/<dataset-folder-name>/augmented/val"  --dataset "<dataset name>"
+python train.py --train_path "datasets/<dataset folder name>/processed/train" --val_path "datasets/<dataset-folder-name>/processed/val"  --dataset "<dataset name>"
 ```
 Check the results in the new folder created `results/<Your dataset experiment results>`. It contains the checkpoint file and training logs. You can also view and change any of the training parameters by running the following command
 ```bash
@@ -59,6 +66,6 @@ options:
 After training, you should have your model best checkpoint saved automatically.  
 1. Please run the following command 
 ```bash
-python test.py --test_path "datasets/<dataset folder name>/augmented/test" --ckpt "results/<Your dataset experiment results>/checkpoints/<checkpoint file name>.pth"
+python test.py --test_path "datasets/<dataset folder name>/processed/test" --ckpt "results/<Your dataset experiment results>/checkpoints/<checkpoint file name>.pth"
 ```
 This will save the segmentation results masks, and testing metrics in the same directory `results/<Your dataset experiment results>`.
