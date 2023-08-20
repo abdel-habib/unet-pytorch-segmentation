@@ -1,3 +1,6 @@
+# <h1 align="center">UNet PyTorch Implementation for Medical Image Segmentation</h1>
+
+
 ## Prerequisites
 - Linux (was tested on Ubuntu 22.04.3 LTS)
 - Python 3.10.4 (was tested on this version, any other should be fine)
