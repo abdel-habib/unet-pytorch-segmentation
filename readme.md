@@ -8,6 +8,7 @@
 - Linux (was tested on Ubuntu 22.04.3 LTS)
 - Python 3.10.4 (was tested on this version, any other should be fine)
 - Pytorch 2.0.1+cu117
+- wandb account for logging (optional)
 
 This code is runnable on any other versions of the above.
 
@@ -25,6 +26,15 @@ pip install -r requirements.txt
 If you wish to train/test using the same datasets, the code has been experimented on the following datasets
 1. <a href="https://datasets.simula.no/kvasir-seg/" target="_blank">Kvasir SEG - Segmented Polyp Dataset for Computer Aided Gastrointestinal Disease Detection.</a>
 2. <a href="https://www.kaggle.com/datasets/zionfuo/drive2004">DRIVE 2004 - Digital Retinal Images for Vessel Extraction</a>
+
+## Monitor Training
+You can monitor the training using wandb platform. You will need to setup your accound and run the following command
+```bash
+wandb login
+```
+You will be required to provide your API key. Note that you need to set the flag during the training process to True `--wandb True` in order to log the data on your wandb project, by default it is set to False `--wandb False`.
+
+![alt text](https://github.com/abdalrhmanu/unet-pytorch-segmentation/blob/main/static/result_monitor.jpg?raw=true)
 
 
 ## Data Preprocessing
@@ -66,6 +76,7 @@ options:
   --img_size IMG_SIZE   input image size of network input
   --seed SEED           random seed
   --ckpt CKPT           pretrained checkpoint
+  --wandb WANDB         wandb logging control flag
 ```
 
 ## Testing

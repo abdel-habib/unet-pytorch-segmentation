@@ -16,6 +16,7 @@ from utils import seeding, create_dir, epoch_time, check_data_empty
 
 from loguru import logger
 from torchsummary import summary
+import wandb
 
 
 def train(model, train_loader, optimizer, loss_fn, device):
@@ -74,6 +75,7 @@ if __name__ == "__main__":
     parser.add_argument('--img_size', type=int, default=512, help='input image size of network input')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
     parser.add_argument('--ckpt', type=str, default='checkpoints/checkpoint.pth', help='pretrained checkpoint')
+    parser.add_argument('--wandb', type=bool, default=False, help='wandb logging control flag')
 
     args = parser.parse_args()
 
@@ -140,6 +142,24 @@ if __name__ == "__main__":
     model = UNet()
     model = model.to(device)
     summary(model.cuda(), (3, args.img_size, args.img_size))
+
+    if(args.wandb):
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=args.exp,
+            
+            # track hyperparameters and run metadata
+            config={
+                "learning_rate": args.base_lr,
+                "batch_size":args.batch_size,
+                "architecture": "UNet",
+                "dataset": args.dataset,
+                "epochs": args.max_epochs,
+            }
+        )
+        
+        # optional: track gradients
+        # wandb.watch(model)
     
     if device.type == 'cuda':
         print(torch.cuda.get_device_name(0))
@@ -152,7 +172,7 @@ if __name__ == "__main__":
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5, verbose=True)
 
     # setting up the loss function
-    loss_fn = DiceBCELoss()
+    loss_fn = DiceLoss()
 
     # training the model
     best_valid_loss = float('inf')
@@ -183,6 +203,10 @@ if __name__ == "__main__":
 
             print(f'Epoch: {epoch+1:02}/{args.max_epochs} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}')
             f.write(f'Epoch: {epoch+1:02}/{args.max_epochs} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}\n')
+
+            if(args.wandb):
+                # logging to wandb
+                wandb.log({"train_loss": train_loss, "valid_loss": valid_loss})
 
             if early_stopping.early_stop:
                 print(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
