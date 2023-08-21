@@ -58,7 +58,7 @@ python train.py --help
 
 usage: train.py [-h] [--train_path TRAIN_PATH] [--val_path VAL_PATH] [--output OUTPUT] [--dataset DATASET]
                 [--max_epochs MAX_EPOCHS] [--batch_size BATCH_SIZE] [--base_lr BASE_LR] [--patience PATIENCE]
-                [--img_size IMG_SIZE] [--seed SEED] [--ckpt CKPT]
+                [--img_size IMG_SIZE] [--seed SEED] [--ckpt CKPT] [--wandb WANDB]
 
 options:
   -h, --help            show this help message and exit
