@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
             if(args.wandb):
                 # logging to wandb
-                wandb.log({"train_loss": train_loss, "valid_loss": valid_loss})
+                wandb.log({"train/loss": train_loss, "val/loss": valid_loss})
 
             if early_stopping.early_stop:
                 print(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
