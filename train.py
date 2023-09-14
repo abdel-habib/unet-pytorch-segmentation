@@ -201,13 +201,13 @@ if __name__ == "__main__":
             end_time = time.time()
             epoch_mins, epoch_secs = epoch_time(start_time, end_time)
 
-            print(f'Epoch: {epoch+1:02}/{args.max_epochs} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}')
-            f.write(f'Epoch: {epoch+1:02}/{args.max_epochs} | Epoch Time: {epoch_mins}m {epoch_secs}s | lr: {after_lr} | Train Loss: {train_loss:.5f} | Val. Loss: {valid_loss:.5f}\n')
+            print(f'Epoch: {epoch+1:02}/{args.max_epochs} | epoch time: {epoch_mins}m {epoch_secs:04}s | lr: {after_lr} | train/loss: {train_loss:.5f} | val/loss: {valid_loss:.5f}')
+            f.write(f'Epoch: {epoch+1:02}/{args.max_epochs} | epoch time: {epoch_mins}m {epoch_secs:04}s | lr: {after_lr} | train/loss: {train_loss:.5f} | val/loss: {valid_loss:.5f}\n')
 
             if(args.wandb):
                 # logging to wandb
                 wandb.log({"train/loss": train_loss, "val/loss": valid_loss})
 
             if early_stopping.early_stop:
-                print(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
+                logger.warning(f"Early stopping triggered at epoch {epoch+1}. Ending model training.")
                 break
